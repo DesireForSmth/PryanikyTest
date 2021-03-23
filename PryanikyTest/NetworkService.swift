@@ -78,7 +78,7 @@ extension NetworkService {
         case .none:
             variants = nil
         case .some(_):
-            var responceVariants = responce.variants!
+            let responceVariants = responce.variants!
             variants = self.parseVariants(responce: responceVariants, selectedID: responce.selectedId)
         }
         let result = DataContent(text: responce.text, url: responce.url, selectedId: responce.selectedId, variants: variants)
