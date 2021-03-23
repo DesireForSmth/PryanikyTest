@@ -7,28 +7,22 @@
 
 import Foundation
 
-enum MainData {
+enum MainDataState {
     case initial
-    case loading(ViewDataStruct)
-    case failure(ViewDataStruct)
-    case success(ViewDataStruct)
+    case loading
+    case failure
+    case success
+}
 
-    struct ViewDataStruct {
-        let data: [DataItem]?
-        let views: [String]?
-    }
+struct ViewDataStruct {
+    let data: [DataItem]?
+    let views: [String]?
 }
 
 struct DataItem {
     let name: String
-    let type: DataType
     let dataContent: DataContent
-
-    enum DataType {
-        case hz
-        case picture
-        case selector
-    }
+    let dataType: DataType
 }
 
 struct DataContent {
@@ -41,4 +35,11 @@ struct DataContent {
 struct SelectionItem {
     let id: Int
     let text: String
+    var isSelected: Bool = false
+}
+
+enum DataType: String {
+    case hz = "hz"
+    case picture = "picture"
+    case selector = "selector"
 }

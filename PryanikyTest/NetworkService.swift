@@ -8,12 +8,12 @@
 import Foundation
 
 protocol NetworkingProtocol {
-    func getMainData(completion: @escaping ((MainData.ViewDataStruct) -> Void))
+    func getMainData(completion: @escaping ((ViewDataStruct) -> Void))
 }
 
 class NetworkService: NetworkingProtocol {
 
-    func getMainData(completion: @escaping ((MainData.ViewDataStruct) -> Void)) {
+    func getMainData(completion: @escaping ((ViewDataStruct) -> Void)) {
         let url = URL(string: "https://pryaniky.com/static/json/sample.json")!
         let task = URLSession.shared.dataTask(with: url) { (data, responce, error) in
             do {
@@ -31,11 +31,19 @@ class NetworkService: NetworkingProtocol {
         task.resume()
     }
 
+    func getImage(from urlString: String, completion: @escaping ((Data) -> Void)) {
+        guard let url = URL(string: urlString) else { return }
+        let task = URLSession.shared.dataTask(with: url) { (data, responce, error) in
+            guard let data = data else { return }
+            completion(data)
+        }
+        task.resume()
+    }
 }
 
 extension NetworkService {
 
-    private func parseMainData(responce: NetworkResponseStruct) -> MainData.ViewDataStruct {
+    private func parseMainData(responce: NetworkResponseStruct) -> ViewDataStruct {
         var views: [String] = []
         var dataItems: [DataItem] = []
         responce.data.forEach {
@@ -45,13 +53,13 @@ extension NetworkService {
         responce.view.forEach {
             views.append($0)
         }
-        let result = MainData.ViewDataStruct(data: dataItems, views: views)
+        let result = ViewDataStruct(data: dataItems, views: views)
         return result
     }
 
     private func parseDataStruct(responce: DataStruct) -> DataItem {
         let dataContent = self.parseNodeData(responce: responce.data)
-        let dataType: DataItem.DataType!
+        let dataType: DataType!
         switch responce.name {
         case .hz:
             dataType = .hz
@@ -60,27 +68,28 @@ extension NetworkService {
         case .picture:
             dataType = .picture
         }
-        let result = DataItem(name: responce.name.rawValue, type: dataType, dataContent: dataContent)
+        let result = DataItem(name: responce.name.rawValue, dataContent: dataContent, dataType: dataType)
         return result
     }
 
     private func parseNodeData(responce: NodeDataStruct) -> DataContent {
-        let variants: [SelectionItem]?
+        var variants: [SelectionItem]?
         switch responce.variants {
         case .none:
             variants = nil
         case .some(_):
-            let responceVariants = responce.variants!
-            variants = self.parseVariants(responce: responceVariants)
+            var responceVariants = responce.variants!
+            variants = self.parseVariants(responce: responceVariants, selectedID: responce.selectedId)
         }
         let result = DataContent(text: responce.text, url: responce.url, selectedId: responce.selectedId, variants: variants)
         return result
     }
 
-    private func parseVariants(responce: [VariantStruct]) -> [SelectionItem] {
+    private func parseVariants(responce: [VariantStruct], selectedID: Int?) -> [SelectionItem] {
         var result: [SelectionItem] = []
         responce.forEach {
-            let item = SelectionItem(id: $0.id, text: $0.text)
+            let selected: Bool = selectedID == $0.id
+            let item = SelectionItem(id: $0.id, text: $0.text, isSelected: selected)
             result.append(item)
         }
         return result
