@@ -19,6 +19,7 @@ class MainTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        self.selectionStyle = .none
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -86,6 +87,7 @@ class MainTableViewCell: UITableViewCell {
 extension MainTableViewCell {
 
     public func configure() {
+        self.selectionStyle = .none
         self.setSelected(false, animated: false)
         self.setupUI()
         self.setCellData()
